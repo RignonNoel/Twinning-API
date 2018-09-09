@@ -27,7 +27,7 @@ class TemporaryTokenDestroyTests(APITestCase):
         This deletes the TemporaryToken assigned to the user.
         """
         data = {
-            'username': self.user.username,
+            'username': self.user.email,
             'password': 'Test123!'
         }
 
@@ -35,7 +35,7 @@ class TemporaryTokenDestroyTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         token = TemporaryToken.objects.get(
-            user__username=self.user.username,
+            user__email=self.user.email,
         )
 
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)

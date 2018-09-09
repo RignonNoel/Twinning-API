@@ -18,19 +18,16 @@ class UsersIdTests(APITestCase):
             'id',
             'url',
             'email',
+            'is_active',
             'first_name',
             'last_name',
-            'is_active',
-            'phone',
-            'other_phone',
             'is_superuser',
             'is_staff',
             'last_login',
             'date_joined',
-            'gender',
-            'birthdate',
             'groups',
             'user_permissions',
+            'organizations'
         ]
 
     def setUp(self):
@@ -163,7 +160,7 @@ class UsersIdTests(APITestCase):
         """
 
         data = {
-            "phone": "1234567890",
+            'first_name': 'toto',
         }
 
         self.client.force_authenticate(user=self.admin)
@@ -180,7 +177,7 @@ class UsersIdTests(APITestCase):
         content = json.loads(response.content)
 
         # Check if update was successful
-        self.assertEqual(content['phone'], data['phone'])
+        self.assertEqual(content['first_name'], data['first_name'])
 
         # Check id of the user
         self.assertEqual(content['id'], 1)
@@ -265,11 +262,6 @@ class UsersIdTests(APITestCase):
         data = {
             'password': 'Test123!',
             'new_password': '!321tset',
-            'phone': '1234567890',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "M",
-            'birthdate': "1999-11-11",
         }
 
         self.client.force_authenticate(user=self.user)
@@ -288,7 +280,6 @@ class UsersIdTests(APITestCase):
         self.user.refresh_from_db()
 
         # Check if update was successful
-        self.assertEqual(content['phone'], data['phone'])
         self.assertTrue(self.user.check_password("!321tset"))
 
         # Check id of the user
@@ -320,7 +311,7 @@ class UsersIdTests(APITestCase):
         """
 
         data = {
-            "phone": "1234567890",
+            "first_name": "toto",
         }
 
         self.client.force_authenticate(user=self.user)
@@ -347,7 +338,7 @@ class UsersIdTests(APITestCase):
         """
 
         data = {
-            "phone": "1234567890",
+            "first_name": "toto",
         }
 
         self.client.force_authenticate(user=self.user)
@@ -375,7 +366,7 @@ class UsersIdTests(APITestCase):
         """
 
         data = {
-            "phone": "1234567890",
+            "first_name": "toto",
         }
 
         self.client.force_authenticate(user=self.admin)
@@ -401,7 +392,7 @@ class UsersIdTests(APITestCase):
         """
 
         data = {
-            "phone": "1234567890",
+            "first_name": "toto",
             "password": "Test123!",
             "new_password": "1234567890",
         }
@@ -471,43 +462,6 @@ class UsersIdTests(APITestCase):
         )
 
         content = {'password': 'Bad password'}
-        self.assertEqual(json.loads(response.content), content)
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_update_user_invalid_fields(self):
-        """
-        Ensure we can't update fields with invalid values.
-        """
-
-        data = {
-            'email': 'John@invalid.com',
-            'password': '1927nce-736',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "invalid_gender",
-            'birthdate': "invalid_date",
-        }
-
-        self.client.force_authenticate(user=self.user)
-
-        response = self.client.patch(
-            reverse(
-                'user-detail',
-                kwargs={'pk': self.user.id},
-            ),
-            data,
-            format='json',
-        )
-
-        content = {
-            'birthdate': [
-                'Date has wrong format. Use one of these formats instead: '
-                'YYYY[-MM[-DD]].'
-            ],
-            'gender': ['"invalid_gender" is not a valid choice.']
-        }
-
         self.assertEqual(json.loads(response.content), content)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

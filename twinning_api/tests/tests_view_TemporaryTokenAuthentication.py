@@ -28,7 +28,7 @@ class TemporaryTokenAuthenticationTests(APITestCase):
         TemporaryToken.
         """
         data = {
-            'username': self.user.username,
+            'username': self.user.email,
             'password': 'Test123!'
         }
 
@@ -65,7 +65,7 @@ class TemporaryTokenAuthenticationTests(APITestCase):
         the API.
         """
         data = {
-            'username': self.user.username,
+            'username': self.user.email,
             'password': 'Test123!'
         }
 
@@ -127,7 +127,7 @@ class TemporaryTokenAuthenticationTests(APITestCase):
         TemporaryToken.
         """
         data = {
-            'username': self.user.username,
+            'username': self.user.email,
             'password': 'Test123!'
         }
 
@@ -135,7 +135,7 @@ class TemporaryTokenAuthenticationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         token = TemporaryToken.objects.get(
-            user__username=self.user.username,
+            user__email=self.user.email,
         )
         token.expire()
 
@@ -162,7 +162,7 @@ class TemporaryTokenAuthenticationTests(APITestCase):
         TemporaryToken if user is inactive.
         """
         data = {
-            'username': self.user.username,
+            'username': self.user.email,
             'password': 'Test123!'
         }
 
@@ -170,7 +170,7 @@ class TemporaryTokenAuthenticationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         token = TemporaryToken.objects.get(
-            user__username=self.user.username,
+            user__email=self.user.email,
         )
 
         setattr(self.user, 'is_active', False)

@@ -46,6 +46,7 @@ router.register(
     views.TemporaryTokenDestroy,
     base_name="authentication",
 )
+router.register('organizations', views.OrganizationViewSet)
 
 urlpatterns = [
     path(

@@ -21,23 +21,6 @@ class ObtainTemporaryAuthTokenTests(APITestCase):
         self.user.save()
         self.url = reverse('token_api')
 
-    def test_authenticate_username(self):
-        """
-        Ensure we can authenticate on the platform.
-        """
-        data = {
-            'username': self.user.username,
-            'password': 'Test123!'
-        }
-
-        response = self.client.post(self.url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        token = TemporaryToken.objects.get(
-            user__username=self.user.username,
-        )
-        self.assertContains(response, token)
-
     def test_authenticate(self):
         """
         Ensure we can authenticate on the platform using a email.
@@ -51,7 +34,7 @@ class ObtainTemporaryAuthTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         token = TemporaryToken.objects.get(
-            user__username=self.user.username,
+            user__email=self.user.email,
         )
         self.assertContains(response, token)
 
@@ -60,7 +43,7 @@ class ObtainTemporaryAuthTokenTests(APITestCase):
         Ensure we can authenticate on the platform when token is expired.
         """
         data = {
-            'username': self.user.username,
+            'username': self.user.email,
             'password': 'Test123!'
         }
 
@@ -68,7 +51,7 @@ class ObtainTemporaryAuthTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         token_old = TemporaryToken.objects.get(
-            user__username=self.user.username,
+            user__email=self.user.email,
         )
         token_old.expire()
 
@@ -76,7 +59,7 @@ class ObtainTemporaryAuthTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         token_new = TemporaryToken.objects.get(
-            user__username=self.user.username,
+            user__email=self.user.email,
         )
 
         self.assertNotContains(response, token_old)
@@ -95,7 +78,7 @@ class ObtainTemporaryAuthTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         tokens = TemporaryToken.objects.filter(
-            user__username='John'
+            user__email='John'
         ).count()
         self.assertEqual(0, tokens)
 
@@ -112,7 +95,7 @@ class ObtainTemporaryAuthTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         tokens = TemporaryToken.objects.filter(
-            user__username='John'
+            user__email='John'
         ).count()
         self.assertEqual(0, tokens)
 
@@ -121,7 +104,7 @@ class ObtainTemporaryAuthTokenTests(APITestCase):
         Ensure we can't authenticate if user is inactive
         """
         data = {
-            'username': self.user.username,
+            'username': self.user.email,
             'password': 'Test123!'
         }
 
@@ -139,7 +122,7 @@ class ObtainTemporaryAuthTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         tokens = TemporaryToken.objects.filter(
-            user__username=self.user.username
+            user__email=self.user.email
         ).count()
         self.assertEqual(0, tokens)
 
@@ -159,6 +142,6 @@ class ObtainTemporaryAuthTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         tokens = TemporaryToken.objects.filter(
-            user__username=self.user.username
+            user__email=self.user.email,
         ).count()
         self.assertEqual(0, tokens)

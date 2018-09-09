@@ -1,52 +1,23 @@
 import binascii
 import os
-
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractUser
-
 from rest_framework.authtoken.models import Token
-
-from .managers import ActionTokenManager
+from .managers import ActionTokenManager, UserManager
+from django.utils.html import format_html
 
 
 class User(AbstractUser):
     """Abstraction of the base User model. Needed to extend in the future."""
+    username = None
+    email = models.EmailField(_('email address'), unique=True)
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
-    GENDER_CHOICES = (
-        ('M', _("Male")),
-        ('F', _("Female")),
-        ('T', _("Trans")),
-        ('A', _("Do not wish to identify myself")),
-    )
-
-    phone = models.CharField(
-        verbose_name=_("Phone number"),
-        blank=True,
-        null=True,
-        max_length=17,
-    )
-    other_phone = models.CharField(
-        verbose_name=_("Other number"),
-        blank=True,
-        null=True,
-        max_length=17,
-    )
-    birthdate = models.DateField(
-        blank=True,
-        null=True,
-        max_length=100,
-        verbose_name=_("Birthdate"),
-    )
-    gender = models.CharField(
-        blank=True,
-        null=True,
-        max_length=100,
-        choices=GENDER_CHOICES,
-        verbose_name=_("Gender"),
-    )
+    objects = UserManager()
 
 
 class TemporaryToken(Token):
@@ -152,54 +123,84 @@ class ActionToken(models.Model):
         return self.key
 
 
-class Address(models.Model):
-    """Abstract model for address"""
-    country = models.CharField(
+class Organization(models.Model):
+    """Organization's modal"""
+
+    name = models.CharField(
         max_length=45,
         blank=False,
+        verbose_name=_("Organization"),
+    )
+
+    logo = models.ImageField(
+        _('logo'),
+        blank=True,
+        upload_to='organizations'
+    )
+
+    description = models.CharField(
+        max_length=1500,
+        blank=False,
+        verbose_name=_("Description"),
+    )
+    godson_value = models.CharField(
+        max_length=1500,
+        blank=False,
+        verbose_name=_("Godson value propositon"),
+    )
+    godfather_value = models.CharField(
+        max_length=1500,
+        blank=False,
+        verbose_name=_("Godfather value proposition"),
+    )
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        verbose_name=_("City"),
+    )
+    country = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
         verbose_name=_("Country"),
     )
 
-    state_province = models.CharField(
-        max_length=55,
-        blank=False,
-        verbose_name=_("State/Province"),
-    )
-    city = models.CharField(
-        max_length=50,
-        blank=False,
-        verbose_name=_("City"),
-    )
-    address_line1 = models.CharField(
-        max_length=45,
-        verbose_name=_("Address line 1"),
-    )
-    address_line2 = models.CharField(
-        max_length=45,
+    categories = models.ManyToManyField(
+        'Category',
         blank=True,
-        default='',
-        verbose_name=_("Address line 2"),
-    )
-    postal_code = models.CharField(
-        max_length=10,
-        verbose_name=_("Postal code"),
-    )
-    latitude = models.FloatField(
-        blank=True,
-        null=True,
-        verbose_name=_("Latitude"),
-    )
-    longitude = models.FloatField(
-        blank=True,
-        null=True,
-        verbose_name=_("Longitude"),
-    )
-    timezone = models.CharField(
-        blank=True,
-        null=True,
-        max_length=100,
-        verbose_name=_("Timezone"),
+        verbose_name=_("Categories"),
+        related_name='organizations',
     )
 
-    class Meta:
-        abstract = True
+    owners = models.ManyToManyField(
+        'User',
+        blank=False,
+        verbose_name=_("Owner"),
+        related_name='organizations',
+    )
+
+    # Needed to display in the admin panel
+    def logo_tag(self):
+        return format_html(
+            '<img href="{0}" src="{0}" height="150" />'
+            .format(self.logo.url)
+        )
+
+    logo_tag.allow_tags = True
+    logo_tag.short_description = 'Logo'
+
+    def __str__(self):
+        return self.name
+
+
+class Category(models.Model):
+    """Category's modal"""
+    name = models.CharField(
+        max_length=45,
+        blank=False,
+        verbose_name=_("Organization"),
+    )
+
+    def __str__(self):
+        return self.name

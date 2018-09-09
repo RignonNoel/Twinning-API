@@ -8,9 +8,6 @@ class UserFactory(factory.DjangoModelFactory):
     class Meta:
         model = User
 
-    first_name = factory.Faker('first_name')
-    last_name = factory.Faker('last_name')
-    username = factory.Sequence('John{0}'.format)
     email = factory.Sequence('john{0}@example.com'.format)
     password = 'Test123!'
 
@@ -19,9 +16,6 @@ class AdminFactory(factory.DjangoModelFactory):
     class Meta:
         model = User
 
-    first_name = factory.Faker('first_name')
-    last_name = factory.Faker('last_name')
-    username = factory.Sequence('Chuck{0}'.format)
     email = factory.Sequence('chuck{0}@example.com'.format)
     password = 'Test123!'
     is_staff = True

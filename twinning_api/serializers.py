@@ -10,21 +10,29 @@ from rest_framework.compat import authenticate
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from .models import (
-    ActionToken,
+    ActionToken, Organization
 )
 
 User = get_user_model()
 
 
-# Validator for phone numbers
-def phone_number_validator(phone):
-    reg = re.compile('^([+][0-9]{1,2})?[0-9]{9,10}$')
-    char_list = " -.()"
-    for i in char_list:
-        phone = phone.replace(i, '')
-    if not reg.match(phone):
-        raise serializers.ValidationError(_("Invalid format."))
-    return phone
+class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Organization
+        fields = '__all__'
+        extra_kwargs = {
+            'description': {
+                'help_text': _("Description of the organization.")
+            },
+            'name': {
+                'help_text': _("Name of the organization."),
+                'validators': [
+                    UniqueValidator(queryset=Organization.objects.all())
+                ],
+            },
+        }
 
 
 class UserUpdateSerializer(serializers.HyperlinkedModelSerializer):
@@ -33,40 +41,15 @@ class UserUpdateSerializer(serializers.HyperlinkedModelSerializer):
     only.
     """
     id = serializers.ReadOnlyField()
-    username = serializers.HiddenField(
-        default=None,
-        help_text=_("A valid username."),
-    )
     new_password = serializers.CharField(
         max_length=128,
         required=False,
         help_text=_("A valid password."),
     )
-    phone = serializers.CharField(
-        allow_blank=True,
-        allow_null=True,
-        label=_('Phone number'),
-        max_length=17,
-        required=False,
-        help_text=_("A valid phone number."),
-    )
-    other_phone = serializers.CharField(
-        allow_blank=True,
-        allow_null=True,
-        label=_('Other number'),
-        max_length=17,
-        required=False,
-        help_text=_("A valid phone number."),
-    )
 
-    def validate_phone(self, value):
-        return phone_number_validator(value)
-
-    def validate_other_phone(self, value):
-        return phone_number_validator(value)
+    organizations = OrganizationSerializer(many=True, read_only=True)
 
     def update(self, instance, validated_data):
-        validated_data['username'] = instance.username
         if 'new_password' in validated_data.keys():
             try:
                 old_pw = validated_data.pop('password')
@@ -102,20 +85,11 @@ class UserUpdateSerializer(serializers.HyperlinkedModelSerializer):
                 'help_text': _("A valid password."),
             },
             'new_password': {'write_only': True},
-            'birthdate': {
-                'help_text': _("Date in the format 'dd/mm/yyyy'"),
-            },
-            'gender': {
-                'allow_blank': False,
-                'help_text': _("(M)ale, (F)emale, (T)rans, (A)nonymous"),
-            },
             'first_name': {
                 'allow_blank': False,
-                'help_text': _("A valid first name."),
             },
             'last_name': {
                 'allow_blank': False,
-                'help_text': _("A valid last name."),
             },
         }
         read_only_fields = (
@@ -129,6 +103,7 @@ class UserUpdateSerializer(serializers.HyperlinkedModelSerializer):
             'groups',
             'user_permissions',
             'email',
+            'organizations'
         )
 
 
@@ -163,7 +138,6 @@ class UserSerializer(UserUpdateSerializer):
         return value
 
     def validate(self, attrs):
-        attrs['username'] = attrs['email']
         return attrs
 
     def create(self, validated_data):
@@ -197,21 +171,6 @@ class UserSerializer(UserUpdateSerializer):
                 'write_only': True,
                 'help_text': _("A valid password."),
             },
-            'gender': {
-                'allow_blank': False,
-                'help_text': _("(M)ale, (F)emale, (T)rans, (A)nonymous")
-            },
-            'birthdate': {
-                'help_text': _("Date in the format 'dd/mm/yyyy'"),
-            },
-            'first_name': {
-                'allow_blank': False,
-                'help_text': _("A valid first name."),
-            },
-            'last_name': {
-                'allow_blank': False,
-                'help_text': _("A valid last name."),
-            },
         }
         read_only_fields = (
             'id',
@@ -231,9 +190,9 @@ class CustomAuthTokenSerializer(AuthTokenSerializer):
     Subclass of default AuthTokenSerializer to enable email authentication
     """
     username = serializers.CharField(
-        label=_("Username"),
+        label=_("email"),
         required=True,
-        help_text=_("A valid username."),
+        help_text=_("A valid email."),
     )
     password = serializers.CharField(
         label=_("Password"),
@@ -244,17 +203,16 @@ class CustomAuthTokenSerializer(AuthTokenSerializer):
     )
 
     def validate(self, attrs):
-        username = attrs.get('username')
+        email = attrs.get('username')
         password = attrs.get('password')
 
         try:
-            user_obj = User.objects.get(email=username)
-            username = user_obj.username
+            user_obj = User.objects.get(email=email)
         except User.DoesNotExist:
             pass
 
         user = authenticate(request=self.context.get('request'),
-                            username=username, password=password)
+                            email=email, password=password)
 
         if not user:
             msg = _('Unable to log in with provided credentials.')

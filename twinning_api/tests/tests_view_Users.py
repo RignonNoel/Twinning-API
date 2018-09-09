@@ -29,51 +29,13 @@ class UsersTests(APITestCase):
         self.admin.set_password('Test123!')
         self.admin.save()
 
-    def test_create_new_student_user(self):
-        """
-        Ensure we can create a new user if we have the permission.
-        """
-        data = {
-            'username': 'John',
-            'email': 'John@mailinator.com',
-            'password': 'test123!',
-            'phone': '1234567890',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "M",
-            'birthdate': "1999-11-11",
-        }
-
-        response = self.client.post(
-            reverse('user-list'),
-            data,
-            format='json',
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(json.loads(response.content)['phone'], '1234567890')
-
-        user = User.objects.get(email="John@mailinator.com")
-        activation_token = ActionToken.objects.filter(
-            user=user,
-            type='account_activation',
-        )
-
-        self.assertEqual(1, len(activation_token))
-
     def test_create_new_user(self):
         """
         Ensure we can create a new user if we have the permission.
         """
         data = {
-            'username': 'John',
             'email': 'John@mailinator.com',
             'password': 'test123!',
-            'phone': '1234567890',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "M",
-            'birthdate': "1999-11-11",
         }
 
         response = self.client.post(
@@ -83,7 +45,6 @@ class UsersTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(json.loads(response.content)['phone'], '1234567890')
 
         user = User.objects.get(email="John@mailinator.com")
         activation_token = ActionToken.objects.filter(
@@ -100,11 +61,6 @@ class UsersTests(APITestCase):
         data = {
             'email': '',
             'password': '',
-            'phone': '',
-            'first_name': '',
-            'last_name': '',
-            'gender': "",
-            'birthdate': "",
         }
 
         response = self.client.post(
@@ -116,16 +72,8 @@ class UsersTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         content = {
-            'birthdate': [
-                'Date has wrong format. Use one of these formats instead: '
-                'YYYY[-MM[-DD]].'
-            ],
-            'first_name': ['This field may not be blank.'],
-            'gender': ['"" is not a valid choice.'],
-            'last_name': ['This field may not be blank.'],
             'email': ['This field may not be blank.'],
             'password': ['This field may not be blank.'],
-            'phone': ['Invalid format.'],
         }
         self.assertEqual(json.loads(response.content), content)
 
@@ -154,13 +102,8 @@ class UsersTests(APITestCase):
         Ensure we can't create a new user with a weak password
         """
         data = {
-            'username': 'John',
             'email': 'John@mailinator.com',
             'password': '19274682736',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "M",
-            'birthdate': "1999-11-11",
         }
 
         response = self.client.post(
@@ -181,13 +124,8 @@ class UsersTests(APITestCase):
         messages are sent in this case.
         """
         data = {
-            'username': 'John',
-            'email': 'John@invalid.com',
+            'email': 'John..invalid.com',
             'password': '1927nce-736',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "invalid_gender",
-            'birthdate': "invalid_date",
         }
 
         response = self.client.post(
@@ -199,41 +137,7 @@ class UsersTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         content = {
-            'birthdate': [
-                'Date has wrong format. Use one of these formats instead: '
-                'YYYY[-MM[-DD]].'
-            ],
-            'gender': ['"invalid_gender" is not a valid choice.'],
-        }
-        self.assertEqual(json.loads(response.content), content)
-
-    def test_create_new_user_invalid_phone(self):
-        """
-        Ensure we can't create a new user with an invalid phone number
-        """
-        data = {
-            'username': 'John',
-            'email': 'John@mailinator.com',
-            'password': '1fasd6dq#$%',
-            'phone': '12345',
-            'other_phone': '23445dfg',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "M",
-            'birthdate': "1999-11-11",
-        }
-
-        response = self.client.post(
-            reverse('user-list'),
-            data,
-            format='json',
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        content = {
-            "phone": ['Invalid format.'],
-            "other_phone": ['Invalid format.']
+            'email': ['Enter a valid email address.']
         }
         self.assertEqual(json.loads(response.content), content)
 
@@ -246,11 +150,6 @@ class UsersTests(APITestCase):
             'username': 'John',
             'email': 'John@mailinator.com',
             'password': 'test123!',
-            'phone': '1234567890',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "M",
-            'birthdate': "1999-11-11",
         }
 
         user = UserFactory()
@@ -288,14 +187,8 @@ class UsersTests(APITestCase):
         """
 
         data = {
-            'username': 'John',
             'email': 'John@mailinator.com',
             'password': 'test123!',
-            'phone': '1234567890',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "M",
-            'birthdate': "1999-11-11",
         }
 
         instance_imailing = imailing.create_instance.return_value
@@ -310,7 +203,6 @@ class UsersTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(json.loads(response.content)['phone'], '1234567890')
 
         user = User.objects.get(email="John@mailinator.com")
         activation_token = ActionToken.objects.filter(
@@ -337,14 +229,8 @@ class UsersTests(APITestCase):
         """
 
         data = {
-            'username': 'John',
             'email': 'John@mailinator.com',
             'password': 'test123!',
-            'phone': '1234567890',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "M",
-            'birthdate': "1999-11-11",
         }
 
         instance_imailing = imailing.create_instance.return_value
@@ -392,14 +278,8 @@ class UsersTests(APITestCase):
         """
 
         data = {
-            'username': 'John',
             'email': 'John@mailinator.com',
             'password': 'test123!',
-            'phone': '1234567890',
-            'first_name': 'Chuck',
-            'last_name': 'Norris',
-            'gender': "M",
-            'birthdate': "1999-11-11",
         }
 
         instance_imailing = imailing.create_instance.return_value
@@ -448,19 +328,16 @@ class UsersTests(APITestCase):
             'id',
             'url',
             'email',
-            'first_name',
-            'last_name',
             'is_active',
-            'phone',
-            'other_phone',
             'is_superuser',
             'is_staff',
             'last_login',
             'date_joined',
-            'gender',
-            'birthdate',
             'groups',
             'user_permissions',
+            'first_name',
+            'last_name',
+            'organizations',
         ]
         for key in first_user.keys():
             self.assertTrue(

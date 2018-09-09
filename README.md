@@ -1,6 +1,4 @@
-
-[![Build Status](https://travis-ci.org/samdidos/samdidos/twinning_api.svg?branch=develop)](https://travis-ci.org/samdidos/samdidos/twinning_api)
-
+[![Build Status](https://travis-ci.org/RignonNoel/Twinning-API.svg?branch=master)](https://travis-ci.org/RignonNoel/Twinning-API)
 
 twinning project for godfathers and godsons
 
@@ -36,7 +34,7 @@ We're going to install and configure the latest develop build of this API.
 First of all, you need to clone the project on your computer with :
 
 ```
-git clone https://github.com/samdidos/twinning-api.git
+git clone https://github.com/rignonnoel/twinning-api.git
 ```
 
 You can now move in the newly created folder:

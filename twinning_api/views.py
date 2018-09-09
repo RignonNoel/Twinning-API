@@ -17,12 +17,28 @@ from rest_framework.parsers import JSONParser
 from imailing.Mailing import IMailing
 
 from .models import (
-    TemporaryToken, ActionToken,
+    TemporaryToken, ActionToken, Organization
 )
 
 from . import serializers, permissions
 
 User = get_user_model()
+
+
+class OrganizationViewSet(viewsets.ModelViewSet):
+    """
+    retrieve:
+    Return the given organization.
+    list:
+    Return a list of all the existing organizations.
+    create:
+    Create a new organization instance.
+    """
+    serializer_class = serializers.OrganizationSerializer
+    queryset = Organization.objects.all()
+    permission_classes = (permissions.IsAdminOrReadOnly,)
+    filter_fields = ('name', 'country', 'city', 'categories')
+    ordering = ('name',)
 
 
 class UserViewSet(viewsets.ModelViewSet):
