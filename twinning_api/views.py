@@ -17,28 +17,12 @@ from rest_framework.parsers import JSONParser
 from imailing.Mailing import IMailing
 
 from .models import (
-    TemporaryToken, ActionToken, Organization
+    TemporaryToken, ActionToken, Organization, Question
 )
 
 from . import serializers, permissions
 
 User = get_user_model()
-
-
-class OrganizationViewSet(viewsets.ModelViewSet):
-    """
-    retrieve:
-    Return the given organization.
-    list:
-    Return a list of all the existing organizations.
-    create:
-    Create a new organization instance.
-    """
-    serializer_class = serializers.OrganizationSerializer
-    queryset = Organization.objects.all()
-    permission_classes = (permissions.IsAdminOrReadOnly,)
-    filter_fields = ('name', 'country', 'city', 'categories')
-    ordering = ('name',)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -404,3 +388,35 @@ class TemporaryTokenDestroy(viewsets.GenericViewSet, mixins.DestroyModelMixin):
             user=self.request.user,
         )
         return tokens
+
+
+class OrganizationViewSet(viewsets.ModelViewSet):
+    """
+    retrieve:
+    Return the given organization.
+    list:
+    Return a list of all the existing organizations.
+    create:
+    Create a new organization instance.
+    """
+    serializer_class = serializers.OrganizationSerializer
+    queryset = Organization.objects.all()
+    permission_classes = (permissions.IsAdminOrReadOnly,)
+    filter_fields = ('name', 'country', 'city', 'categories')
+    ordering = ('name',)
+
+
+class QuestionViewSet(viewsets.ModelViewSet):
+    """
+    retrieve:
+    Return the given question.
+    list:
+    Return a list of all the existing questions.
+    create:
+    Create a new question instance.
+    """
+    serializer_class = serializers.QuestionSerializer
+    queryset = Question.objects.all()
+    permission_classes = (permissions.IsAdminOrReadOnly,)
+    filter_fields = ('title', 'text_godson', 'text_godfather', 'organization')
+    ordering = ('title',)

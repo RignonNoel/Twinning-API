@@ -189,7 +189,7 @@ SETTINGS_IMAILING = {
 # User specific settings
 
 LOCAL_SETTINGS = {
-    'ORGANIZATION': "Nom_de_compagnie",
+    'ORGANIZATION': "Twinning Program",
     "EMAIL_SERVICE": False,
     "AUTO_ACTIVATE_USER": False,
     "FRONTEND_INTEGRATION": {

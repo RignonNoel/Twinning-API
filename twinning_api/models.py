@@ -196,11 +196,31 @@ class Organization(models.Model):
 
 class Category(models.Model):
     """Category's modal"""
+    class Meta:
+        verbose_name_plural = _("Categories")
     name = models.CharField(
         max_length=45,
         blank=False,
-        verbose_name=_("Organization"),
+        verbose_name=_("Category"),
     )
 
     def __str__(self):
         return self.name
+
+
+class Question(models.Model):
+    """ Question included in form lines and form model """
+    title = models.CharField(
+        max_length=100,
+        blank=True
+    )
+    text_godson = models.CharField(
+        max_length=300,
+    )
+    text_godfather = models.CharField(
+        max_length=300,
+    )
+    severity = models.PositiveSmallIntegerField(
+        default=0
+    )
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)

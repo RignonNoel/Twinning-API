@@ -40,13 +40,14 @@ router = OptionalSlashDefaultRouter()
 # ie: router.registry.extend(app_router.registry)
 
 # Main application routes
-router.register('users', views.UserViewSet)
 router.register(
     'authentication',
     views.TemporaryTokenDestroy,
     base_name="authentication",
 )
 router.register('organizations', views.OrganizationViewSet)
+router.register('questions', views.QuestionViewSet)
+router.register('users', views.UserViewSet)
 
 urlpatterns = [
     path(

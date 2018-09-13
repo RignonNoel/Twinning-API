@@ -10,7 +10,7 @@ from rest_framework.compat import authenticate
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from .models import (
-    ActionToken, Organization
+    ActionToken, Organization, Question
 )
 
 User = get_user_model()
@@ -31,6 +31,28 @@ class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
                 'validators': [
                     UniqueValidator(queryset=Organization.objects.all())
                 ],
+            },
+        }
+
+
+class QuestionSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Question
+        fields = '__all__'
+        extra_kwargs = {
+            'title': {
+                'help_text': _("Title of the question."),
+            },
+            'text_godson': {
+                'help_text': _("The question for the godson."),
+            },
+            'text_godfather': {
+                'help_text': _("The question for the godfather."),
+            },
+            'organization': {
+                'help_text': _("The organization who owns the question."),
             },
         }
 
