@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.utils.translation import ugettext_lazy as _
 
-from .models import User, Organization, Category
+from .models import User, Organization, Category, Question, AnswerOption
 
 
 @admin.register(User)
@@ -29,3 +29,5 @@ class UserAdmin(DjangoUserAdmin):
 
 admin.site.register(Organization)
 admin.site.register(Category)
+admin.site.register(Question)
+admin.site.register(AnswerOption)

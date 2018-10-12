@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractUser
 from rest_framework.authtoken.models import Token
 from .managers import ActionTokenManager, UserManager
 from django.utils.html import format_html
-
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class User(AbstractUser):
     """Abstraction of the base User model. Needed to extend in the future."""
@@ -221,6 +221,18 @@ class Question(models.Model):
         max_length=300,
     )
     severity = models.PositiveSmallIntegerField(
-        default=0
+        default=0,
+        validators=[
+            MaxValueValidator(100),
+            MinValueValidator(1)
+        ]
     )
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+
+
+class AnswerOption(models.Model):
+    """ Possible answer to a question """
+    answer_option = models.CharField(
+        max_length=300,
+    )
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)

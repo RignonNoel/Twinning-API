@@ -17,7 +17,7 @@ from rest_framework.parsers import JSONParser
 from imailing.Mailing import IMailing
 
 from .models import (
-    TemporaryToken, ActionToken, Organization, Question
+    TemporaryToken, ActionToken, Organization, Question, AnswerOption
 )
 
 from . import serializers, permissions
@@ -420,3 +420,19 @@ class QuestionViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAdminOrReadOnly,)
     filter_fields = ('title', 'text_godson', 'text_godfather', 'organization')
     ordering = ('title',)
+
+
+class AnswerOptionViewSet(viewsets.ModelViewSet):
+    """
+    retrieve:
+    Return the given answer option.
+    list:
+    Return a list of all the existing answer options.
+    create:
+    Create a new answer option instance.
+    """
+    serializer_class = serializers.AnswerOptionSerializer
+    queryset = AnswerOption.objects.all()
+    permission_classes = (permissions.IsAdminOrReadOnly,)
+    filter_fields = ('answer_option', 'question')
+    ordering = ('question',)

@@ -10,7 +10,7 @@ from rest_framework.compat import authenticate
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from .models import (
-    ActionToken, Organization, Question
+    ActionToken, Organization, Question, AnswerOption
 )
 
 User = get_user_model()
@@ -56,6 +56,21 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
             },
         }
 
+
+class AnswerOptionSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = AnswerOption
+        fields = '__all__'
+        extra_kwargs = {
+            'answer_option': {
+                'help_text': _("Possible answer of a question."),
+            },
+            'question': {
+                'help_text': _("The question it should answer."),
+            },
+        }
 
 class UserUpdateSerializer(serializers.HyperlinkedModelSerializer):
     """

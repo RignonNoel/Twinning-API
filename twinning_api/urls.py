@@ -47,6 +47,7 @@ router.register(
 )
 router.register('organizations', views.OrganizationViewSet)
 router.register('questions', views.QuestionViewSet)
+router.register('answeroptions', views.AnswerOptionViewSet)
 router.register('users', views.UserViewSet)
 
 urlpatterns = [

@@ -7,16 +7,16 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 
 from ..factories import UserFactory, AdminFactory
-from ..models import Question, Organization
+from ..models import Question, Organization, AnswerOption
 
 User = get_user_model()
 
 
-class QuestionTests(APITestCase):
+class AnswerOptionTests(APITestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(QuestionTests, cls).setUpClass()
+        super(AnswerOptionTests, cls).setUpClass()
         cls.client = APIClient()
         cls.user = UserFactory()
         cls.admin = AdminFactory()
@@ -38,34 +38,34 @@ class QuestionTests(APITestCase):
             organization=self.organization
         )
 
-        self.question.save()
+        self.answerOption = AnswerOption.objects.create(
+            answer_option='answer option',
+            question=self.question
+        )
+
+        self.answerOption.save()
 
     def test_create(self):
         """
-        Ensure we can create a question if user has permission.
+        Ensure we can create an answer option if user has permission.
         """
         self.client.force_authenticate(user=self.admin)
 
         data = {
-            'title': "question title 2",
-            'text_godson': "question for godson 2",
-            'text_godfather': "question for godfather 2",
-            'organization': 'http://testserver/organizations/1',
+            'answer_option': "answer option 2",
+            'question': 'http://testserver/questions/1',
         }
 
         response = self.client.post(
-            reverse('question-list'),
+            reverse('answeroption-list'),
             data,
             format='json',
         )
 
         content = {
-            'title': "question title 2",
-            'text_godson': "question for godson 2",
-            'text_godfather': "question for godfather 2",
-            'url': 'http://testserver/questions/2',
-            'severity': 0,
-            'organization': 'http://testserver/organizations/1',
+            'answer_option': "answer option 2",
+            'question': 'http://testserver/questions/1',
+            'url': 'http://testserver/answeroptions/2',
             'id': 2
         }
 
@@ -75,22 +75,21 @@ class QuestionTests(APITestCase):
 
     def test_create_missing_field(self):
         """
-        Ensure we can't create a question when required field are missing.
+        Ensure we can't create an answer option when required field are missing.
         """
         self.client.force_authenticate(user=self.admin)
 
         data = {}
 
         response = self.client.post(
-            reverse('question-list'),
+            reverse('answeroption-list'),
             data,
             format='json',
         )
 
         content = {
-            'text_godson': ['This field is required.'],
-            'text_godfather': ['This field is required.'],
-            'organization': ['This field is required.'],
+            'answer_option': ['This field is required.'],
+            'question': ['This field is required.'],
         }
 
         self.assertEqual(json.loads(response.content), content)
@@ -99,30 +98,24 @@ class QuestionTests(APITestCase):
 
     def test_create_invalid_field(self):
         """
-        Ensure we can't create a question with invalid fields.
+        Ensure we can't create an answer option with invalid fields.
         """
         self.client.force_authenticate(user=self.admin)
 
         data = {
-            'title': ("invalid",),
-            'text_godson': ("invalid",),
-            'text_godfather': ("invalid",),
-            'severity': 10000000000000,
-            'organization': "invalid",
+            'answer_option': ("invalid",),
+            'question': "invalid",
         }
 
         response = self.client.post(
-            reverse('question-list'),
+            reverse('answeroption-list'),
             data,
             format='json',
         )
 
         content = {
-            'title': ['Not a valid string.'],
-            'text_godson': ['Not a valid string.'],
-            'text_godfather': ['Not a valid string.'],
-            'severity': ['Ensure this value is less than or equal to 100.'],
-            'organization': ['Invalid hyperlink - No URL match.'],
+            'answer_option': ['Not a valid string.'],
+            'question': ['Invalid hyperlink - No URL match.'],
         }
 
         self.assertEqual(json.loads(response.content), content)
@@ -131,20 +124,18 @@ class QuestionTests(APITestCase):
 
     def test_update(self):
         """
-        Ensure we can update a question.
+        Ensure we can update an answer option.
         """
         self.client.force_authenticate(user=self.admin)
 
         data = {
-            'title': "question title 3",
-            'text_godson': "question for godson 3",
-            'text_godfather': "question for godfather 3",
-            'organization': 'http://testserver/organizations/1'
+            'answer_option': "answer option 3",
+            'question': 'http://testserver/questions/1'
         }
 
         response = self.client.put(
             reverse(
-                'question-detail',
+                'answeroption-detail',
                 kwargs={'pk': 1},
             ),
             data,
@@ -152,13 +143,10 @@ class QuestionTests(APITestCase):
         )
 
         content = {
-            'title': "question title 3",
-            'text_godson': "question for godson 3",
-            'text_godfather': "question for godfather 3",
-            'severity': 0,
-            'organization': 'http://testserver/organizations/1',
+            'answer_option': "answer option 3",
+            'question': 'http://testserver/questions/1',
             'id': 1,
-            'url': 'http://testserver/questions/1'
+            'url': 'http://testserver/answeroptions/1'
         }
 
         self.assertEqual(json.loads(response.content), content)
@@ -167,13 +155,13 @@ class QuestionTests(APITestCase):
 
     def test_delete(self):
         """
-        Ensure we can delete a question.
+        Ensure we can delete an answer option.
         """
         self.client.force_authenticate(user=self.admin)
 
         response = self.client.delete(
             reverse(
-                'question-detail',
+                'answeroption-detail',
                 kwargs={'pk': 1},
             ),
         )
@@ -182,11 +170,11 @@ class QuestionTests(APITestCase):
 
     def test_list(self):
         """
-        Ensure we can list questions as an unauthenticated user.
+        Ensure we can list answer options as an unauthenticated user.
         """
 
         response = self.client.get(
-            reverse('question-list'),
+            reverse('answeroption-list'),
             format='json',
         )
 
@@ -195,12 +183,9 @@ class QuestionTests(APITestCase):
             'next': None,
             'previous': None,
             'results': [{
-                'title': "question title",
-                'text_godson': "question for godson",
-                'text_godfather': "question for godfather",
-                'severity': 0,
-                'organization': 'http://testserver/organizations/1',
-                'url': 'http://testserver/questions/1',
+                'answer_option': "answer option",
+                'question': 'http://testserver/questions/1',
+                'url': 'http://testserver/answeroptions/1',
                 'id': 1
             }]
         }
@@ -211,13 +196,13 @@ class QuestionTests(APITestCase):
 
     def test_read_non_existent_question(self):
         """
-        Ensure we get not found when asking for a question
+        Ensure we get not found when asking for an answer option
         that doesn't exist.
         """
 
         response = self.client.get(
             reverse(
-                'question-detail',
+                'answeroption-detail',
                 kwargs={'pk': 999},
             ),
         )
